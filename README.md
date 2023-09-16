@@ -18,10 +18,10 @@ This is the project in which the BCA backend app will be developed in.
 In order to configure this project, the following environment variables are required:
 
 ```bash
-DB_USERNAME=andres
-DB_PASSWORD=fjcl1229
-DB_NAME=bca
-DB_PORT=5432
+DB_USERNAME
+DB_PASSWORD
+DB_NAME
+DB_PORT
 
-PORT=42069
+PORT
 ```
