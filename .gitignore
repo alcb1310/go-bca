@@ -1,0 +1,14 @@
+# Environment variables
+.env
+
+# Log folder
+log/
+
+# Database connection
+DB_USERNAME=andres
+DB_PASSWORD=fjcl1229
+DB_NAME=bca
+DB_PORT=5432
+
+# Port to run the server
+PORT=42069
