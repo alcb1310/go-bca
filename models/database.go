@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gitlab.com/0x4149/logz"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type DB struct {
@@ -22,10 +24,15 @@ func Initialize() DB {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, pass, dbName, dbPort)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
 	if err != nil {
 		logz.Fatal("Unable to connect to the database")
 	}
 
+	db.AutoMigrate(&Company{})
 	return DB{data: db}
 }
