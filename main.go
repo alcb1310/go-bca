@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/alcb1310/bca-go/models"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -38,6 +39,9 @@ func main() {
 			logz.Fatal("Unable to load environment variables")
 		}
 	}
+
+	_ = models.Initialize()
+
 	r := mux.NewRouter()
 	r.Use(jsonMiddleware) // All responses will be of type application/json
 
