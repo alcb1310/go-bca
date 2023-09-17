@@ -3,3 +3,6 @@
 
 # Log folder
 log/
+
+# JSON test files
+test/
