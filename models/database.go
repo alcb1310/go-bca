@@ -41,5 +41,8 @@ func Initialize() DB {
 	db.AutoMigrate(&Budget{})
 	db.AutoMigrate(&Invoice{})
 	db.AutoMigrate(&InvoiceDetails{})
+	db.AutoMigrate(&Historic{})
+
+	logz.Info("Database connected")
 	return DB{data: db}
 }
