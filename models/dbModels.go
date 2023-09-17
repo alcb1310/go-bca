@@ -27,3 +27,15 @@ type User struct {
 	CompanyId string  `json:"companyId" gorm:"type:uuid"`
 	Company   Company `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
 }
+
+type Project struct {
+	Model
+	Name     string `json:"name" gorm:"not null;index;index:uq_project,unique"`
+	IsActive bool   `json:"isActive" gorm:"not null;default:true"`
+
+	Company   Company `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	CompanyId string  `json:"companyId" gorm:"type:uuid;index:uq_project,unique"`
+
+	User   User   `json:"user" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	UserId string `json:"userId" gorm:"type:uuid"`
+}
