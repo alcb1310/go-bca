@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/alcb1310/bca-go/models"
-	"gitlab.com/0x4149/logz"
 	"gorm.io/gorm"
 )
 
@@ -34,14 +33,28 @@ func register(w http.ResponseWriter, r *http.Request) {
 		Employees: newCompany.Employees,
 	}
 
-	result := database.Create(&c)
-	logz.Debug(result)
-	if result.Error != nil {
-		logz.Debug(result.Error)
+	tx := database.Begin()
+
+	if err := tx.Create(&c).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
+		tx.Rollback()
 		return
 	}
 
+	u := models.User{
+		Email:    newCompany.UserName,
+		Name:     newCompany.UserFullName,
+		Password: newCompany.UserPassword,
+		Company:  c,
+	}
+
+	if err = tx.Create(&u).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusConflict)
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(c)
 }
