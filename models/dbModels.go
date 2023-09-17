@@ -18,3 +18,12 @@ type Company struct {
 	Employees uint   `json:"employees" gorm:"not null;type:int;default:1"`
 	IsActive  bool   `json:"isActive" gorm:"not null;default:true"`
 }
+
+type User struct {
+	Model
+	Email     string  `json:"email" gorm:"unique;not null"`
+	Password  string  `json:"password" gorm:"not null"`
+	Name      string  `json:"name" gorm:"index"`
+	CompanyId string  `json:"companyId" gorm:"type:uuid"`
+	Company   Company `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+}
