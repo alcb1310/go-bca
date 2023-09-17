@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/alcb1310/bca-go/constants"
 	"github.com/alcb1310/bca-go/models"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -41,10 +43,12 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pass, _ := bcrypt.GenerateFromPassword([]byte(newCompany.UserPassword), constants.SALT)
+
 	u := models.User{
 		Email:    newCompany.UserName,
 		Name:     newCompany.UserFullName,
-		Password: newCompany.UserPassword,
+		Password: string(pass),
 		Company:  c,
 	}
 
