@@ -21,13 +21,13 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 type Router struct {
-	db      models.DB
+	DB      models.DB
 	r       *mux.Router
 	Handler http.Handler
 }
 
 func (b *Router) Routes() {
-	b.db = models.Initialize()
+	b.DB.Initialize()
 	b.r = mux.NewRouter()
 
 	b.r.Use(jsonMiddleware) // All responses will be of type application/json
@@ -35,7 +35,7 @@ func (b *Router) Routes() {
 	b.r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		res := response{
-			Message: "Testing again and again",
+			Message: "Last test",
 		}
 		json.NewEncoder(w).Encode(res)
 	})

@@ -11,11 +11,13 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+var err error
+
 type DB struct {
-	data *gorm.DB
+	Data *gorm.DB
 }
 
-func Initialize() DB {
+func (d *DB) Initialize() {
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USERNAME")
 	pass := os.Getenv("DB_PASSWORD")
@@ -24,7 +26,7 @@ func Initialize() DB {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, pass, dbName, dbPort)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	d.Data, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
@@ -33,16 +35,15 @@ func Initialize() DB {
 		logz.Fatal("Unable to connect to the database")
 	}
 
-	db.AutoMigrate(&Company{})
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Project{})
-	db.AutoMigrate(&Supplier{})
-	db.AutoMigrate(&BudgetItem{})
-	db.AutoMigrate(&Budget{})
-	db.AutoMigrate(&Invoice{})
-	db.AutoMigrate(&InvoiceDetails{})
-	db.AutoMigrate(&Historic{})
+	d.Data.AutoMigrate(&Company{})
+	d.Data.AutoMigrate(&User{})
+	d.Data.AutoMigrate(&Project{})
+	d.Data.AutoMigrate(&Supplier{})
+	d.Data.AutoMigrate(&BudgetItem{})
+	d.Data.AutoMigrate(&Budget{})
+	d.Data.AutoMigrate(&Invoice{})
+	d.Data.AutoMigrate(&InvoiceDetails{})
+	d.Data.AutoMigrate(&Historic{})
 
 	logz.Info("Database connected")
-	return DB{data: db}
 }
