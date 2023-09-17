@@ -39,7 +39,7 @@ func (b *Router) Routes() {
 		}
 		json.NewEncoder(w).Encode(res)
 	})
-
+	b.companyRoutes()
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
 
