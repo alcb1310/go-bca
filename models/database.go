@@ -39,5 +39,6 @@ func Initialize() DB {
 	db.AutoMigrate(&Supplier{})
 	db.AutoMigrate(&BudgetItem{})
 	db.AutoMigrate(&Budget{})
+	db.AutoMigrate(&Invoice{})
 	return DB{data: db}
 }

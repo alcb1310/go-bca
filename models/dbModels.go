@@ -100,3 +100,22 @@ type Budget struct {
 	User   User   `json:"user" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
 	UserId string `json:"userId" gorm:"not null;type:uuid"`
 }
+
+type Invoice struct {
+	Model
+
+	Project    Project  `json:"project" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	ProjectId  string   `json:"projectId" gorm:"not null;type:uuid;index:uq_invoiceprojectsupplier,unique"`
+	Supplier   Supplier `json:"supplier" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	SupplierId string   `json:"supplierId" gorm:"not null;type:uuid;index:uq_invoiceprojectsupplier,unique"`
+
+	InvoiceNumber string    `json:"invoiceNumber" gorm:"not null;index:uq_invoiceprojectsupplier,unique"`
+	InvoiceDate   time.Time `json:"invoiceDate" gorm:"not null;type:Date;index"`
+	InvoiceTotal  float64   `json:"invoiceTotal" gorm:"not null;type:decimal(20,8);default:0"`
+
+	Company   Company `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	CompanyId string  `json:"companyId" gorm:"not null;type:uuid;index:uq_invoiceprojectsupplier,unique"`
+
+	User   User   `json:"user" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	UserId string `json:"userId" gorm:"not null;type:uuid"`
+}
