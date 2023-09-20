@@ -63,7 +63,14 @@ func register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(c)
 }
 
+func login(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(response{
+		Message: "Login in",
+	})
+}
+
 func (b *Router) companyRoutes() {
 	database = b.DB.Data
-	b.r.HandleFunc("/register", register).Methods("POST")
+	b.r.HandleFunc("/register", register).Methods(http.MethodPost)
+	b.r.HandleFunc("/login", login).Methods(http.MethodPost)
 }
