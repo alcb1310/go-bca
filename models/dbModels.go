@@ -19,16 +19,6 @@ type Company struct {
 	IsActive  bool   `json:"isActive" gorm:"not null;default:true"`
 }
 
-type User struct {
-	Model
-	Email    string `json:"email" gorm:"unique;not null"`
-	Password string `json:"password" gorm:"not null"`
-	Name     string `json:"name" gorm:"index"`
-
-	CompanyId uuid.UUID `json:"companyId" gorm:"not null;type:uuid"`
-	Company   Company   `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
-}
-
 type Project struct {
 	Model
 	Name     string `json:"name" gorm:"not null;index;index:uq_projectname,unique"`

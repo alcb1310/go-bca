@@ -33,6 +33,7 @@ func authVerify(next http.Handler) http.Handler {
 			return
 		}
 		logz.Debug(token[1])
+		logz.Debug("User has been properly authenticated")
 
 		next.ServeHTTP(w, r)
 	})

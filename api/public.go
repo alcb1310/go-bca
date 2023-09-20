@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"net/mail"
 
 	"github.com/alcb1310/bca-go/constants"
 	"github.com/alcb1310/bca-go/models"
@@ -25,6 +26,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 	var newCompany registerCompany
 	err := json.NewDecoder(r.Body).Decode(&newCompany)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if _, err := mail.ParseAddress(newCompany.UserName); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -64,6 +70,18 @@ func register(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+	var credentials models.LoginType
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = models.Login(credentials, database)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	json.NewEncoder(w).Encode(response{
 		Message: "Login in",
 	})
