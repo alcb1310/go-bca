@@ -26,3 +26,7 @@ DB_PORT
 
 PORT
 ```
+
+## API Routes
+
+- **/login** will allow the registered user to login to the application, on success it will return a JWT Token as a prove of authentication

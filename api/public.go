@@ -2,11 +2,16 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/mail"
+	"os"
+	"time"
 
 	"github.com/alcb1310/bca-go/constants"
 	"github.com/alcb1310/bca-go/models"
+	"github.com/alcb1310/bca-go/utils"
+	"gitlab.com/0x4149/logz"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -21,6 +26,10 @@ type registerCompany struct {
 }
 
 var database *gorm.DB
+
+var secretKey = os.Getenv("SECRET")
+
+// const secretKey = "MySuperSecretKey"
 
 func register(w http.ResponseWriter, r *http.Request) {
 	var newCompany registerCompany
@@ -73,17 +82,29 @@ func login(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginType
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "No email/password", http.StatusBadRequest)
 		return
 	}
 
-	_, err = models.Login(credentials, database)
+	u, err := models.Login(credentials, database)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	logz.Debug(secretKey)
+	jwtMaker, err := utils.NewJWTMaker(secretKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	token, err := jwtMaker.CreateToken(*u, 60*time.Minute)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	json.NewEncoder(w).Encode(response{
-		Message: "Login in",
+		Message: fmt.Sprintf("Bearer %s", token),
 	})
 }
 

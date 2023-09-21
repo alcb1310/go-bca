@@ -25,25 +25,23 @@ type LoginType struct {
 	Password string `json:"password"`
 }
 
-func Login(l LoginType, db *gorm.DB) (string, error) {
+func Login(l LoginType, db *gorm.DB) (*User, error) {
 	if _, err := mail.ParseAddress(l.Email); err != nil {
 		logz.Debug("Invalid email address")
-		return "", errors.New("Invalid credentials")
+		return nil, errors.New("Invalid credentials")
 	}
 	var user User
 	result := db.Find(&user, "email = ?", l.Email)
 	if result.Error != nil {
-		return "", result.Error
+		return nil, result.Error
 	}
 	if result.RowsAffected != 1 {
-		return "", errors.New("Invalid credentials")
+		return nil, errors.New("Invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(l.Password)); err != nil {
-		return "", errors.New("Invalid credentials")
+		return nil, errors.New("Invalid credentials")
 	}
 
-	logz.Debug(result.RowsAffected)
-
-	return "", nil
+	return &user, nil
 }

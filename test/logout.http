@@ -1,0 +1,2 @@
+GET http://0.0.0.0:42069/api/v1/logout
+Authorization: Bearer adklfjañdjl
