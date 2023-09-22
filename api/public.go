@@ -11,7 +11,6 @@ import (
 	"github.com/alcb1310/bca-go/constants"
 	"github.com/alcb1310/bca-go/models"
 	"github.com/alcb1310/bca-go/utils"
-	"gitlab.com/0x4149/logz"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -26,10 +25,6 @@ type registerCompany struct {
 }
 
 var database *gorm.DB
-
-var secretKey = os.Getenv("SECRET")
-
-// const secretKey = "MySuperSecretKey"
 
 func register(w http.ResponseWriter, r *http.Request) {
 	var newCompany registerCompany
@@ -91,7 +86,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	logz.Debug(secretKey)
+
+	secretKey := os.Getenv("SECRET")
 	jwtMaker, err := utils.NewJWTMaker(secretKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)

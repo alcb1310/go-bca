@@ -8,18 +8,20 @@ import (
 	"github.com/alcb1310/bca-go/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"gitlab.com/0x4149/logz"
 )
 
 var ErrExpiredToken = errors.New("token has expired")
+var ErrInvalidToken = errors.New("invalid token")
 
 const minSecretKeySize = 8
 
 type Payload struct {
-	ID        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
+	ID         uuid.UUID `json:"id"`
+	Email      string    `json:"email"`
+	CompanyId  uuid.UUID `json:"company_id"`
+	IsLoggedIn bool      `json:"is_logged_in"`
+	IssuedAt   time.Time `json:"issued_at"`
+	ExpiredAt  time.Time `json:"expired_at"`
 }
 
 type JWTMaker struct {
@@ -32,7 +34,6 @@ type Maker interface {
 }
 
 func NewJWTMaker(secretKey string) (Maker, error) {
-	logz.Debug(len(secretKey), secretKey, minSecretKeySize)
 	if len(secretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 	}
@@ -41,10 +42,12 @@ func NewJWTMaker(secretKey string) (Maker, error) {
 
 func NewPayload(u models.User, duration time.Duration) *Payload {
 	payload := &Payload{
-		ID:        u.Id,
-		Email:     u.Email,
-		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(duration),
+		ID:         u.Id,
+		Email:      u.Email,
+		CompanyId:  u.CompanyId,
+		IsLoggedIn: true,
+		IssuedAt:   time.Now(),
+		ExpiredAt:  time.Now().Add(duration),
 	}
 	return payload
 }
@@ -57,26 +60,34 @@ func (maker *JWTMaker) CreateToken(userInfo models.User, duration time.Duration)
 }
 
 func (payload *Payload) Valid() error {
-	if time.Now().After(payload.ExpiredAt) {
+	if payload.IsLoggedIn && time.Now().After(payload.ExpiredAt) {
 		return ErrExpiredToken
 	}
 	return nil
 }
 
 func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
-	return nil, fmt.Errorf("Not implemented")
-}
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, ErrInvalidToken
+		}
+		return []byte(maker.secretKey), nil
+	}
 
-// func GenerateJWT(u *models.User) (string, error) {
-// token := jwt.New(jwt.SigningMethodEdDSA)
-// claims := token.Claims.(jwt.MapClaims)
-// claims["exp"] = time.Now().Add(10 * time.Minute)
-// claims["authorized"] = true
-// claims["user"] = u.Email
-// tokenString, err := token.SignedString(sampleSecretKey)
-// if err != nil {
-// return "Signing Error", err
-// }
-//
-// return tokenString, nil
-// }
+	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
+	if err != nil {
+		verr, ok := err.(*jwt.ValidationError)
+		if ok && errors.Is(verr.Inner, ErrExpiredToken) {
+			return nil, ErrExpiredToken
+		}
+		return nil, ErrInvalidToken
+	}
+
+	payload, ok := jwtToken.Claims.(*Payload)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+
+	return payload, nil
+}

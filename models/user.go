@@ -5,7 +5,6 @@ import (
 	"net/mail"
 
 	"github.com/google/uuid"
-	"gitlab.com/0x4149/logz"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -27,7 +26,6 @@ type LoginType struct {
 
 func Login(l LoginType, db *gorm.DB) (*User, error) {
 	if _, err := mail.ParseAddress(l.Email); err != nil {
-		logz.Debug("Invalid email address")
 		return nil, errors.New("Invalid credentials")
 	}
 	var user User
