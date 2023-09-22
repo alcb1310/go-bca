@@ -59,20 +59,11 @@ func authVerify(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(r.Context(), "token", marshalStr)
 		r = r.Clone(ctx)
-		// logz.Info(r.Context())
-		// context.Set(r, "token", tokenData)
-
 		next.ServeHTTP(w, r)
 	})
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-
-	// type tokenContextKey string
-	// k := tokenContextKey("token")
-	// ctx := r.Context()
-	// val := ctx.Value("token")
-
 	token, err := GetMyPaload(r)
 	if err != nil {
 		logz.Error("Process fucked up")
