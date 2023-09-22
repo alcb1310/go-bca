@@ -44,6 +44,7 @@ func (d *DB) Initialize() {
 	d.Data.AutoMigrate(&Invoice{})
 	d.Data.AutoMigrate(&InvoiceDetails{})
 	d.Data.AutoMigrate(&Historic{})
+	d.Data.AutoMigrate(&LoggedInUser{})
 
 	logz.Info("Database connected")
 }

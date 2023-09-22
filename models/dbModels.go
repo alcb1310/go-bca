@@ -11,6 +11,11 @@ type Model struct {
 	CreatedAt time.Time `json:"createdAt" gorm:"not null;default:now()"`
 }
 
+type LoggedInUser struct {
+	Email string `json:"email" gorm:"primary_key"`
+	JWT   []byte `json:"jwt"`
+}
+
 type Company struct {
 	Model
 	Ruc       string `json:"ruc" gorm:"unique;not null"`

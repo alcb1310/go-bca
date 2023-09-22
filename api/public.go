@@ -99,6 +99,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	byteToken := []byte(token)
+	loggedInUser := models.LoggedInUser{
+		Email: u.Email,
+		JWT:   byteToken,
+	}
+
+	result := database.Create(loggedInUser)
+	if result.Error != nil {
+		database.Save(&loggedInUser)
+	}
+
 	json.NewEncoder(w).Encode(response{
 		Message: fmt.Sprintf("Bearer %s", token),
 	})
