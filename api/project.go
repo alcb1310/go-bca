@@ -6,11 +6,18 @@ import (
 
 	"github.com/alcb1310/bca-go/models"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"gitlab.com/0x4149/logz"
 )
 
 type projectEdit struct {
 	Name string `json:"name"`
+}
+type project struct {
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	IsActive  bool      `json:"is_active"`
+	CompanyId uuid.UUID `json:"company_id"`
 }
 
 func createProject(w http.ResponseWriter, r *http.Request) {
@@ -47,22 +54,39 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllProjects(w http.ResponseWriter, r *http.Request) {
-	type Project struct {
-		Id        uuid.UUID `json:"id"`
-		Name      string    `json:"name"`
-		IsActive  bool      `json:"is_active"`
-		CompanyId uuid.UUID `json:"company_id"`
-	}
-	var allProjects []Project
+	var allProjects []project
 
 	payload, err := GetMyPaload(r)
 	if err != nil {
 		logz.Error(err)
 		return
 	}
-	logz.Debug(payload.CompanyId)
 	database.Find(&allProjects, "company_id = ?", payload.CompanyId)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(allProjects)
+}
+
+func getOneProject(w http.ResponseWriter, r *http.Request) {
+	var selectedProject project
+	vars := mux.Vars(r)
+	projectId := vars["projectId"]
+
+	payload, err := GetMyPaload(r)
+	if err != nil {
+		logz.Error(err)
+		return
+	}
+
+	result := database.Find(&selectedProject, "company_id = ? and id = ?", payload.CompanyId, projectId)
+	if result.Error != nil || result.RowsAffected != 1 {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(response{
+			Message: "Project not found",
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(selectedProject)
 }

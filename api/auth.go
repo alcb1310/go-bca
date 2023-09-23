@@ -148,4 +148,5 @@ func authRoutes(r *mux.Router) {
 	// project routes
 	r.HandleFunc("/projects", createProject).Methods(http.MethodPost)
 	r.HandleFunc("/projects", getAllProjects).Methods(http.MethodGet)
+	r.HandleFunc("/projects/{projectId}", getOneProject).Methods(http.MethodGet)
 }
