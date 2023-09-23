@@ -8,6 +8,7 @@ import (
 	"gitlab.com/0x4149/logz"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -30,6 +31,7 @@ func (d *DB) Initialize() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		logz.Fatal("Unable to connect to the database")

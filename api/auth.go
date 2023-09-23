@@ -144,4 +144,8 @@ func refresh(w http.ResponseWriter, r *http.Request) {
 func authRoutes(r *mux.Router) {
 	r.HandleFunc("/logout", logout).Methods(http.MethodGet)
 	r.HandleFunc("/refresh", refresh).Methods(http.MethodPut)
+
+	// project routes
+	r.HandleFunc("/projects", createProject).Methods(http.MethodPost)
+	r.HandleFunc("/projects", getAllProjects).Methods(http.MethodGet)
 }
