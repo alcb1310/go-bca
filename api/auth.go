@@ -90,7 +90,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logz.Debug(token.Email)
+	database.Delete(&models.LoggedInUser{}, "email = ?", token.Email)
 
 	json.NewEncoder(w).Encode(response{
 		Message: "Log out",
