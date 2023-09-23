@@ -1,12 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/alcb1310/bca-go/models"
 	"github.com/alcb1310/bca-go/utils"
 	"github.com/gorilla/mux"
 	"gitlab.com/0x4149/logz"
@@ -59,6 +61,24 @@ func authVerify(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(r.Context(), "token", marshalStr)
 		r = r.Clone(ctx)
+		var u models.LoggedInUser
+		result := database.First(&u, "email=?", tokenData.Email)
+		if result.Error != nil || result.RowsAffected != 1 {
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(&errorResponse{
+				Error: "Invalid token",
+			})
+			return
+		}
+
+		if !bytes.Equal([]byte(token[1]), u.JWT) {
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(&errorResponse{
+				Error: "Invalid token",
+			})
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
