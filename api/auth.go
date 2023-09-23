@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/alcb1310/bca-go/models"
 	"github.com/alcb1310/bca-go/utils"
@@ -86,18 +88,60 @@ func authVerify(next http.Handler) http.Handler {
 func logout(w http.ResponseWriter, r *http.Request) {
 	token, err := GetMyPaload(r)
 	if err != nil {
-		logz.Error("Process fucked up")
+		logz.Error(err)
 		return
 	}
 
 	database.Delete(&models.LoggedInUser{}, "email = ?", token.Email)
 
 	json.NewEncoder(w).Encode(response{
-		Message: "Log out",
+		Message: "User logged out",
+	})
+}
+
+func refresh(w http.ResponseWriter, r *http.Request) {
+	oldToken, err := GetMyPaload(r)
+	if err != nil {
+		logz.Error(err)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	var u models.User
+	result := database.Find(&u, "email = ?", oldToken.Email)
+	if result.Error != nil {
+		logz.Error("This should never occur")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	secretKey := os.Getenv("SECRET")
+	jwtMaker, err := utils.NewJWTMaker(secretKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	token, err := jwtMaker.CreateToken(u, 60*time.Minute)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	byteToken := []byte(token)
+	loggedInUser := models.LoggedInUser{
+		Email: u.Email,
+		JWT:   byteToken,
+	}
+
+	database.Save(&loggedInUser)
+
+	json.NewEncoder(w).Encode(response{
+		Message: fmt.Sprintf("Bearer %s", token),
 	})
 }
 
 func authRoutes(r *mux.Router) {
 	r.HandleFunc("/logout", logout).Methods(http.MethodGet)
-
+	r.HandleFunc("/refresh", refresh).Methods(http.MethodPut)
 }
