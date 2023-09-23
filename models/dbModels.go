@@ -11,22 +11,17 @@ type Model struct {
 	CreatedAt time.Time `json:"createdAt" gorm:"not null;default:now()"`
 }
 
+type LoggedInUser struct {
+	Email string `json:"email" gorm:"primary_key"`
+	JWT   []byte `json:"jwt"`
+}
+
 type Company struct {
 	Model
 	Ruc       string `json:"ruc" gorm:"unique;not null"`
 	Name      string `json:"name" gorm:"unique;not null"`
 	Employees uint   `json:"employees" gorm:"not null;type:int;default:1"`
 	IsActive  bool   `json:"isActive" gorm:"not null;default:true"`
-}
-
-type User struct {
-	Model
-	Email    string `json:"email" gorm:"unique;not null"`
-	Password string `json:"password" gorm:"not null"`
-	Name     string `json:"name" gorm:"index"`
-
-	CompanyId uuid.UUID `json:"companyId" gorm:"not null;type:uuid"`
-	Company   Company   `json:"company" gorm:"constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
 }
 
 type Project struct {

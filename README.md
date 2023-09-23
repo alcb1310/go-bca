@@ -26,3 +26,11 @@ DB_PORT
 
 PORT
 ```
+
+## API Routes
+
+### Authentication Routes
+
+- **/login** will allow the registered user to login to the application, on success it will return a JWT Token as a prove of authentication
+- **/api/v1/logout** will logout a user invalidating the JWT Token that was given
+- **/api/v1/refresh** will refresh the JWT Token with a new expiration time

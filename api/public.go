@@ -2,10 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/mail"
+	"os"
+	"time"
 
 	"github.com/alcb1310/bca-go/constants"
 	"github.com/alcb1310/bca-go/models"
+	"github.com/alcb1310/bca-go/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -25,6 +30,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 	var newCompany registerCompany
 	err := json.NewDecoder(r.Body).Decode(&newCompany)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if _, err := mail.ParseAddress(newCompany.UserName); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -63,7 +73,50 @@ func register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(c)
 }
 
+func login(w http.ResponseWriter, r *http.Request) {
+	var credentials models.LoginType
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, "No email/password", http.StatusBadRequest)
+		return
+	}
+
+	u, err := models.Login(credentials, database)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	secretKey := os.Getenv("SECRET")
+	jwtMaker, err := utils.NewJWTMaker(secretKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	token, err := jwtMaker.CreateToken(*u, 60*time.Minute)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	byteToken := []byte(token)
+	loggedInUser := models.LoggedInUser{
+		Email: u.Email,
+		JWT:   byteToken,
+	}
+
+	result := database.Create(loggedInUser)
+	if result.Error != nil {
+		database.Save(&loggedInUser)
+	}
+
+	json.NewEncoder(w).Encode(response{
+		Message: fmt.Sprintf("Bearer %s", token),
+	})
+}
+
 func (b *Router) companyRoutes() {
 	database = b.DB.Data
-	b.r.HandleFunc("/register", register).Methods("POST")
+	b.r.HandleFunc("/register", register).Methods(http.MethodPost)
+	b.r.HandleFunc("/login", login).Methods(http.MethodPost)
 }

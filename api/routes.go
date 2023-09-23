@@ -40,8 +40,13 @@ func (b *Router) Routes() {
 		json.NewEncoder(w).Encode(res)
 	})
 	b.companyRoutes()
+
+	secure := b.r.PathPrefix("/api/v1").Subrouter()
+	secure.Use(authVerify)
+	authRoutes(secure)
+
 	originsOk := handlers.AllowedOrigins([]string{"*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+	methodsOk := handlers.AllowedMethods([]string{http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodPost, "OPTIONS"})
 
 	b.Handler = handlers.CORS(originsOk, methodsOk)(b.r)
 }
