@@ -39,7 +39,6 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response{
 			Message: "Project already exists",
 		})
-		// http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
@@ -63,10 +62,6 @@ func getAllProjects(w http.ResponseWriter, r *http.Request) {
 	}
 	logz.Debug(payload.CompanyId)
 	database.Find(&allProjects, "company_id = ?", payload.CompanyId)
-	// database.Model(&models.Project{}).Select("\"project\".name, \"project\".is_active").Joins("left join company on company.id = projects.company_id").Where("company.id = ?", payload.CompanyId).Find(&allProjects)
-	// database.Joins("Company").Select("\"project\".name, \"project\".is_active").Find(&allProjects)
-	// database.Model(models.Project{CompanyId: payload.CompanyId}).Find(&allProjects)
-	// database.Raw("select name, is_active from project where company_id = ?", payload.CompanyId).Scan(&allProjects)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(allProjects)
