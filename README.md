@@ -18,10 +18,19 @@ This is the project in which the BCA backend app will be developed in.
 In order to configure this project, the following environment variables are required:
 
 ```bash
-DB_USERNAME=andres
-DB_PASSWORD=fjcl1229
-DB_NAME=bca
-DB_PORT=5432
+DB_USERNAME
+DB_HOST
+DB_PASSWORD
+DB_NAME
+DB_PORT
 
-PORT=42069
+PORT
 ```
+
+## API Routes
+
+### Authentication Routes
+
+- **/login** will allow the registered user to login to the application, on success it will return a JWT Token as a prove of authentication
+- **/api/v1/logout** will logout a user invalidating the JWT Token that was given
+- **/api/v1/refresh** will refresh the JWT Token with a new expiration time
