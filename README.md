@@ -30,3 +30,4 @@ PORT
 ## API Routes
 
 - **/login** will allow the registered user to login to the application, on success it will return a JWT Token as a prove of authentication
+- **/api/v1/logout** will logout a user invalidating the JWT Token that was given
