@@ -30,6 +30,7 @@ func (d *DB) Initialize() {
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		// Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		logz.Fatal("Unable to connect to the database")

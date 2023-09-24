@@ -2,7 +2,7 @@ POST http://0.0.0.0:42069/login
 Content-Type: application/json
 
 {
-     "email": "test@test.com",
+     "email": "test1@test.com",
      "password": "password123"
 }
 
